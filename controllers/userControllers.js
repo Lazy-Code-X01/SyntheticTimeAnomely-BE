@@ -8,7 +8,7 @@ const authUser = asyncHandler(async (req, res) => {
 	const user = await User.findOne({ email });
 
 	if (user && (await user.matchPassword(password))) {
-		const token = generateToken(res, user._id);
+		const token = generateToken(user._id);
 		res.status(201).json({
 			_id: user._id,
 			username: user.username,
@@ -41,7 +41,7 @@ const registerUser = asyncHandler(async (req, res) => {
 	});
 
 	if (user) {
-		const token = generateToken(res, user._id);
+		const token = generateToken(user._id);
 		res.status(201).json({
 			_id: user._id,
 			username: user.username,
@@ -79,7 +79,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 	const user = await User.findById(req.user._id);
 
 	if (user) {
-		user.name = req.body.name || user.name;
+		user.username = req.body.username || user.username;
 		user.email = req.body.email || user.email;
 
 		if (req.body.password) {
@@ -90,7 +90,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 
 		res.status(200).json({
 			_id: updatedUser._id,
-			name: updatedUser.name,
+			username: updatedUser.username,
 			email: updatedUser.email,
 			isAdmin: updatedUser.isAdmin,
 		});
@@ -122,13 +122,14 @@ const registerAdmin = asyncHandler(async (req, res) => {
 	});
 
 	if (user) {
-		generateToken(res, user._id);
+		const token = generateToken(user._id);
 		res.status(201).json({
 			_id: user._id,
 			username: user.username,
 			email: user.email,
 			address: user.address,
 			isAdmin: user.isAdmin,
+			token,
 		});
 	} else {
 		res.status(400);
